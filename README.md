@@ -13,5 +13,5 @@ The search form consists of 6 fields based on which user can search news from Go
 are displayed and the Show More button changes to Show Less.
 
 ## Screenshots
-<img align="left" width="200" height="400" src="Flask%20Home.PNG">
-<img align="left" width="200" height="300" src="Flask%20Search.PNG">
+<img align="left" width="400" height="500" src="Flask%20Home.PNG">
+<img align="left" width="400" height="400" src="Flask%20Search.PNG">
