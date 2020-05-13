@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+
+<!-- Load d3.js -->
+<script src="https://d3js.org/d3.v4.js"></script>
+
+<!-- Load d3-cloud -->
+<script src="https://cdn.jsdelivr.net/gh/holtzy/D3-graph-gallery@master/LIB/d3.layout.cloud.js"></script>
+
+  <script language="JavaScript">
+  var user,fox,all,sources_list,words,d1,d,form_data="",all_source;
+  var slideIndex = 0;
+
+  function switchVisibleGoogle() {
+
+    document.getElementById('outer1').style.display = 'none'
+
+    document.getElementById('bottom1').style.display = 'none'
+    document.getElementById('outer1_2').style.display = 'inline-block'
+    document.getElementById('outer1_3').style.display = 'inline-block'
+    document.getElementsByClassName('two')[0].style.backgroundColor='#e7e7e7'
+    document.getElementsByClassName('two')[0].style.color='black'
+    document.getElementsByClassName('one')[0].style.color='white'
+    document.getElementsByClassName('one')[0].style.backgroundColor='gray'
+    document.getElementsByClassName('bottom')[0].style.display = 'block'
+    document.getElementsByClassName('bottom')[1].style.display = 'block'
+    document.getElementsByClassName('bottom1')[0].style.display = 'none'
+
+}
+
+function switchVisibleNews() {
+
+  document.getElementById('outer1').style.display = 'inline-block'
+  document.getElementById('outer1_2').style.display = 'none'
+  document.getElementsByClassName('bottom')[0].style.display = 'none'
+  document.getElementsByClassName('bottom')[1].style.display = 'none'
+  document.getElementsByClassName('two')[0].style.backgroundColor='gray'
+  document.getElementsByClassName('one')[0].style.backgroundColor='#e7e7e7'
+  document.getElementsByClassName('one')[0].style.color='black'
+  document.getElementsByClassName('two')[0].style.color='white'
+  document.getElementsByClassName('bottom1')[0].style.display = 'block'
+  document.getElementById('outer1_3').style.display = 'none'
+
+}
+const API_URL_CNN = '/get_cnn'
+const API_URL_FOX = '/get_fox'
+const API_URL_ALL = '/get_all'
+const API_URL = '/get_source'
+const API_URL_FORM = '/get_form_response'
+const API_URL_CLOUD = '/wordcloud'
+function showSlides() {
+  //console.log("slide show")
+  var i;
+  var slides = document.getElementsByClassName("mySlides");
+  console.log(slides.length)
+  for (i = 0; i < slides.length; i++) {
+
+    slides[i].style.display = "none";
+  }
+  slideIndex++;
+  if (slideIndex > slides.length) {slideIndex = 1}
+
+  slides[slideIndex-1].style.display = "block";
+  setTimeout(showSlides, 2000); // Change image every 2 seconds
+}
+function switchVisibleNewsInitial()
+{
+
+  //showSlides()
+
+    document.getElementById('outer1').style.display = 'none'
+    const xhr = new XMLHttpRequest()
+
+
+    xhr.addEventListener('load', handleResponseCNN)
+    xhr.open('GET', API_URL_CNN,false)
+    xhr.send(null)
+
+    const xhr1 = new XMLHttpRequest()
+    xhr1.addEventListener('load', handleResponseFox)
+    xhr1.open('GET', API_URL_FOX,false)
+    xhr1.send(null)
+
+    const xhr2 = new XMLHttpRequest()
+    xhr2.addEventListener('load', handleResponseAll)
+    xhr2.open('GET', API_URL_ALL,false)
+    xhr2.send(null)
+
+
+    const xhr3 = new XMLHttpRequest()
+    xhr3.addEventListener('load', handleResponseCloud)
+    xhr3.open('GET', API_URL_CLOUD,false)
+    xhr3.send(null)
+
+    // const data = new FormData()
+    const xhr4 = new XMLHttpRequest()
+    // data.append('input', "all")
+    xhr4.addEventListener('load', handleResponse)
+    var url=API_URL+"?input=all"
+    xhr4.open('GET', url,true)
+    xhr4.send()
+
+}
+const handleResponseAll = ({ target }) => {
+  // Do something useful here...
+  var arr1=target.responseText
+  //console.log(arr1)
+  console.log("BEGIN ALL")
+  jsonObj= JSON.parse(arr1)
+  all=jsonObj
+  console.log(all)
+
+  console.log("END ALL")
+
+}
+const handleResponseCloud = ({ target }) => {
+  // Do something useful her
+  var arr1=target.responseText
+  //console.log(arr1)
+  jsonObj1= JSON.parse(arr1)
+  words=jsonObj1
+  console.log(words.obj)
+  //console.log(all)
+
+}
+const handleResponseCNN = ({ target }) => {
+  // Do something useful here...
+  console.log("called CNN");
+  var arr=target.responseText
+  jsonObj= JSON.parse(arr);
+
+  user=jsonObj;
+  console.log(user.articles[0].description)
+  console.log("CNN END")
+}
+
+const handleResponseFox = ({ target }) => {
+  // Do something useful here...
+
+  console.log("BEGIN FOX")
+  var arr=target.responseText
+  jsonObj= JSON.parse(arr);
+  fox=jsonObj;
+  console.log(jsonObj.articles[0])
+
+  console.log("END FOX")
+
+}
+function show_more()
+{
+  String.prototype.trunc =
+     function( n, useWordBoundary ){
+         if (this.length <= n) { return this; }
+         var subString = this.substr(0, n-1);
+         return (useWordBoundary
+            ? subString.substr(0, subString.lastIndexOf(' '))
+            : subString) + "...";
+      };
+
+
+  if(document.getElementById('show')!=undefined&&document.getElementById('show').innerHTML=="Show More")
+  {
+  var myHTML3="<div class=\"first_ten\">"
+  for(var i=0;i<form_data.articles.length;i++)
+  {
+    myHTML3 += " <div class = \'news\' style=\' margin: 10px; width: 600px;\'>"+"<div class=\'full\'><div style=\"display: inline-block; vertical-align:top;\">"
+  +"<img style=\"float:left;\" class=\'logo\' src= \'"+   form_data.articles[i].urlToImage +"\'></div>"
+  +  "<div style=\"display:inline-block; width: 450px;\" ><div class=\"close\" style=\"display:inline-block;\">&#10006;</div><p class=\"module1\"> "
+  + "<strong>" + form_data.articles[i].title +"</strong>" + "<br>"+
+  "<strong>Author:&nbsp;</strong>"+form_data.articles[i].author+"<br>"+
+  "<strong>Source:&nbsp;</strong>"+form_data.articles[i].source.name+"<br>"+
+  "<strong>Date:&nbsp;</strong>"+form_data.articles[i].publishedAt+"<br>"+
+  form_data.articles[i].description+"<br>"+
+  "<a target='_blank' href="+  form_data.articles[i].url  +">See Original Post</a>"
+  + "</p></div></div>"
+  + "<div class=\"half\"><div style=\"display: inline-block; vertical-align:top; \"><img style=\"float:left;\" class=\"logo\" src=\" " + form_data.articles[i].urlToImage+ "\"></div>"
+  +  "<div style=\"display:inline-block; width: 450px;\"><div  class=\"close1\" style=\"display:inline-block; float:right;\">&nbsp;&nbsp;</div><div class=\"line-clamp module\"><p>"
+  +"<strong>" + form_data.articles[i].title +"</strong>" + "<br>" +form_data.articles[i].description.trunc(57,true)
+  +"</p></div></div></div></div>"
+  }
+
+  myHTML3 += "<button id=\"show\" value=\'Show More\' onClick=\"show_more()\">Show Less</button></div>"
+  document.getElementById('show').innerHTML="Show Less"
+  document.getElementsByClassName("bottom2")[0].innerHTML=myHTML3;
+
+  document.getElementsByClassName("bottom2")[0].style.display="block"
+  document.getElementsByClassName("bottom1")[0].style.display="none"
+
+}
+  else if(document.getElementById('show')==undefined || document.getElementById('show').innerHTML=="Show Less" )
+  {
+
+
+    myHTML3="<div class=\"first_five\">"
+    for(var i=0;i<5;i++)
+    {
+      myHTML3 += " <div class = \'news\' style=\' margin: 10px; width: 600px;\'>"+"<div class=\'full\'><div style=\"display: inline-block; vertical-align:top;\">"
+    +"<img style=\"float:left;\" class=\'logo\' src= \'"+   form_data.articles[i].urlToImage +"\'></div>"
+    +  "<div style=\"display:inline-block; width: 450px;\" ><div class=\"close\" style=\"display:inline-block;\">&#10006;</div><p class=\"module1\"> "
+    + "<strong>" + form_data.articles[i].title +"</strong>" + "<br>" +
+    "<strong>Author:&nbsp;</strong>"+form_data.articles[i].author+"<br>"+
+    "<strong>Source:&nbsp;</strong>"+form_data.articles[i].source.name+"<br>"+
+    "<strong>Date:&nbsp;</strong>"+form_data.articles[i].publishedAt+"<br>"+
+    form_data.articles[i].description+"<br>"+
+    "<a target='_blank' href="+  form_data.articles[i].url  +">See Original Post</a>"
+    + "</p></div></div>"
+    + "<div class=\"half\"><div style=\"display: inline-block; vertical-align:top; \"><img style=\"float:left;\" class=\"logo\" src=\" " + form_data.articles[i].urlToImage+ "\"></div>"
+    +  "<div style=\"display:inline-block; width: 450px;\"><div  class=\"close1\" style=\"display:inline-block; float:right;\">&nbsp;&nbsp;</div><div class=\"line-clamp module\"><p>"
+    +"<strong>" + form_data.articles[i].title +"</strong>" + "<br>" +form_data.articles[i].description.trunc(57,true)
+    +"</p></div></div></div></div>"
+    }
+    myHTML3 += "<button id=\"show\" value=\'Show More\' onClick=\"show_more()\">Show More</button></div>"
+
+    document.getElementsByClassName("bottom1")[0].innerHTML=myHTML3;
+
+    document.getElementById('show').innerHTML="Show More"
+    // document.getElementsByClassName("first_five")[0].display="none"
+
+    document.getElementsByClassName("bottom1")[0].style.display="block"
+    // document.getElementsByClassName("bottom2")[0].innerHTML=myHTML3;
+    document.getElementsByClassName("bottom2")[0].style.display="none"
+
+  }
+
+  var coll = document.getElementsByClassName("half");
+  for (i = 0; i < coll.length; i++) {
+    coll[i].addEventListener("click", function() {
+
+      var content = (this.previousElementSibling)
+       {
+         // this.style.display="none";
+         this.style.display="none";
+         content.style.display = "-webkit-box";
+
+      }
+    });
+  }
+
+  var col2 = document.getElementsByClassName("close");
+  for (i = 0; i < col2.length; i++) {
+      col2[i].addEventListener("click", function() {
+        // alert(this.nodeName)
+         {
+
+             this.style.color="purple"
+           this.parentElement.parentElement.nextElementSibling.style.display = "-webkit-box";
+
+           this.parentElement.parentElement.style.display="none";
+        }
+      });
+    }
+
+}
+const handleResponseForm = ({ target }) => {
+  // Do something useful here...
+
+  console.log("BEGIN FORM")
+  console.log(target.message)
+  var arr=target.responseText
+  console.log(arr)
+
+  jsonObj= JSON.parse(arr);
+
+  if(jsonObj.status=="error")
+    {
+      window.alert(jsonObj.message)
+      return
+    }
+  form_data=jsonObj;
+var myHTML3 = "";
+String.prototype.trunc =
+   function( n, useWordBoundary ){
+       if (this.length <= n) { return this; }
+       var subString = this.substr(0, n-1);
+       return (useWordBoundary
+          ? subString.substr(0, subString.lastIndexOf(' '))
+          : subString) + "...";
+    };
+
+
+console.log(jsonObj.message+" "+jsonObj.status)
+document.getElementsByClassName("bottom2")[0].innerHTML="";
+// document.getElementsByClassName("bottom1")[0].innerHTML="";
+if(form_data.articles!==undefined && form_data.articles.length!=0){
+  if(form_data.articles.length<=5)
+  {
+    myHTML3=""
+    for(var i=0;i<form_data.articles.length;i++)
+    {
+
+      myHTML3 += " <div class = \'news\' style=\' margin: 10px; width: 600px;\'>"+"<div class=\'full\'><div style=\"display: inline-block; vertical-align:top;\">"
+    +"<img style=\"float:left;\" class=\'logo\' src= \'"+   form_data.articles[i].urlToImage +"\'></div>"
+    +  "<div style=\"display:inline-block; width: 450px;\" ><div class=\"close\" style=\"display:inline-block;\">&#10006;</div><p class=\"module1\"> "
+    + "<strong>" + form_data.articles[i].title +"</strong>" + "<br>" +
+    "<strong>Author:&nbsp;</strong>"+form_data.articles[i].author+"<br>"+
+    "<strong>Source:&nbsp;</strong>"+form_data.articles[i].source.name+"<br>"+
+    "<strong>Date:&nbsp;</strong>"+form_data.articles[i].publishedAt+"<br>"+
+    form_data.articles[i].description+"<br>"+
+    "<a target='_blank' href="+  form_data.articles[i].url  +">See Original Post</a>"
+
+
+    + "</p></div></div>"
+    + "<div class=\"half\"><div style=\"display: inline-block; vertical-align:top; \"><img style=\"float:left;\" class=\"logo\" src=\" " + form_data.articles[i].urlToImage+ "\"></div>"
+    +  "<div style=\"display:inline-block; width: 450px;\"><div  class=\"close1\" style=\"display:inline-block; float:right;\">&nbsp;&nbsp;</div><div class=\"line-clamp module\"><p>"
+    +"<strong>" + form_data.articles[i].title +"</strong>" + "<br>" +form_data.articles[i].description.trunc(57,true)
+    +"</p></div></div></div></div>"
+    }
+
+    document.getElementsByClassName("bottom1")[0].innerHTML=myHTML3;
+    document.getElementsByClassName("bottom1")[0].style.display="block";
+
+    document.getElementsByClassName("bottom2")[0].style.display="none";
+    document.getElementsByClassName("bottom2")[0].innerHTML="";
+}
+else if(form_data.articles.length>5)
+{
+  console.log("more than 5")
+  if(document.getElementById('show')==undefined)
+  show_more()
+  else {
+    if(document.getElementById('show').innerHTML=="Show More")
+    document.getElementById('show').innerHTML="Show Less"
+    else if(document.getElementById('show').innerHTML=="Show Less")
+    document.getElementById('show').innerHTML="Show More"
+
+    show_more()
+  }
+}
+
+}
+else
+{
+  console.log("no content")
+  document.getElementsByClassName("bottom1")[0].innerHTML="No results";
+}
+var coll = document.getElementsByClassName("half");
+for (i = 0; i < coll.length; i++) {
+  coll[i].addEventListener("click", function() {
+
+    var content = (this.previousElementSibling)
+     {
+       // this.style.display="none";
+       this.style.display="none";
+       content.style.display = "-webkit-box";
+
+    }
+  });
+}
+
+var col2 = document.getElementsByClassName("close");
+for (i = 0; i < col2.length; i++) {
+    col2[i].addEventListener("click", function() {
+       {
+         this.style.color="purple"
+         this.parentElement.parentElement.nextElementSibling.style.display = "-webkit-box";
+
+         this.parentElement.parentElement.style.display="none";
+      }
+    });
+  }
+
+
+
+}
+
+function get_form_response()
+{
+  var keyword=document.getElementById('Keyword').value;
+  var from_date=document.getElementById('From').value;
+  var to_date=document.getElementById('To').value;
+  var date1 = new Date(from_date);
+  var date2 = new Date(to_date);
+  var category=document.getElementById('category').options[document.getElementById('category').selectedIndex].value;
+  var source=document.getElementById('source').options[document.getElementById('source').selectedIndex].value;
+  var url=API_URL_FORM+"?keyword="+keyword+"&from_date="+from_date+"&to_date="+to_date+"&source="+source
+  xmlhttp = new XMLHttpRequest();
+  xmlhttp.addEventListener('load', handleResponseForm)
+  xmlhttp.open("GET", url, true);
+  xmlhttp.send();
+
+}
+
+        const handleResponse = ({ target }) => {
+          // Do something useful here...
+          sources_list=JSON.parse(target.responseText);
+          var x = document.getElementById("source");
+          var length = x.options.length;
+          for (i = length-1; i > 0; i--) {
+            x.options[i] = null;
+          }
+              for(i=0;i<sources_list.sources.length;i++)
+              {
+                console.log(sources_list.sources[i].name);
+                var option = document.createElement("option");
+                option.text = sources_list.sources[i].name;
+                option.value=sources_list.sources[i].name;
+                x.add(option);
+              }
+
+
+        }
+       function get_source(value)
+       {
+            const xhr = new XMLHttpRequest()
+            const data = new FormData()
+            // if(value!='all')
+            {
+            data.append('input', value)
+            xhr.addEventListener('load', handleResponse)
+            url=API_URL+"?input="+value
+            alert(url)
+            xhr.open('GET', url,true)
+            xhr.send()
+          }
+
+       }
+
+       function clear_form()
+       {
+         var d1 = new Date();
+         d1.setDate(d1.getDate() - 1);
+         document.getElementById("To").valueAsDate=d1
+         var d = new Date();
+         d.setDate(d.getDate() - 7);
+         document.getElementById("From").valueAsDate=d
+         console.log("form cleared")
+
+        document.getElementsByClassName('bottom2')[0].innerHTML = ""
+        document.getElementsByClassName('bottom1')[0].innerHTML = ""
+        document.getElementsByClassName('bottom2')[0].style.display = 'none'
+        document.getElementsByClassName('bottom1')[0].style.display = 'none'
+       }
+      function hello()
+      {
+      }
+
+  </script>
+  <style>
+
+  .fade {
+    -webkit-animation-name: fade;
+    -webkit-animation-duration: 1.5s;
+    animation-name: fade;
+    animation-duration: 1.5s;
+  }
+  .mySlides {
+    display: none;
+    height: 100%;
+    width: 100%;
+
+  }
+
+.im{
+  width: 100%;
+  height: 100px;
+
+  border-radius: 10px;
+  object-fit: cover!important;
+
+}
+  .text {
+    color: #f2f2f2;
+    font-size: 15px;
+    padding: 8px 12px;
+    position: absolute;
+    bottom: 1px;
+    width: 94.5%;
+    text-align: center;
+    background-color: rgba(0,0,0,.3);
+
+  }
+  .external
+{
+    margin-left: 290px;
+}
+.cloas:active
+{
+  color:red;
+}
+.outer1_2
+{
+  cursor: pointer;
+display: inline-block;
+height: 200px;
+background-color: #E8E8E8;
+width: 440px;
+margin-left: 250px;
+vertical-align: middle;
+margin-top:30px;
+position: relative;
+}
+.outer1_3
+{
+display: inline-block;
+height: 200px;
+
+background-color: #E8E8E8;
+width: 220px;
+margin-left: 30px;
+vertical-align: middle;
+margin-top:30px;
+
+}
+
+.outer1
+{
+    display: inline-block;
+    height: 200px;
+    background-color: #E8E8E8;
+    width: 690px;
+    margin-left: 250px;
+    vertical-align: middle;
+    margin-top: 30px;
+    text-align: center;
+
+}
+.outer1_1
+{
+display: inline-block;
+}
+
+hr{
+  border-top: 1px dashed;
+}
+
+.child_1{
+padding-top: 25px;
+
+}
+
+.child_2{
+padding-top: 30px;
+}
+.child_3{
+padding-top: 30px;
+}
+.two_button
+{
+display: inline-block;
+height: 100%;
+position: fixed;
+margin-top: 30px;
+}
+.one:hover , .two:hover   {
+background-color: #4CAF50!important;
+color: white!important;
+}
+
+.one{
+width: 150px;
+height: 40px;
+border: none;
+background-color: gray;
+color: white;
+display: block;
+}
+.two
+{
+display: inline-block;
+width: 150px;
+height: 40px;
+border: none;
+margin-top: -1px;
+}
+
+.bottom
+{
+width: 690px;
+margin-top: 70px;
+margin-left: 250px;
+
+}
+
+.bottom1
+{
+width: 620px;
+margin-top: 50px;
+margin-left: 250px;
+}
+.bottom2
+{
+width: 620px;
+margin-top: 50px;
+margin-left: 250px;
+display: none;
+}
+.news
+{
+  background-color: #E8E8E8;
+  border:2px solid #C0C0C0;
+  border-radius: 10px;
+
+
+}
+.half
+{
+  cursor: pointer;
+  display: -webkit-box;
+
+}
+.comp
+{
+  color:red;
+}
+.full
+{
+
+  display: -webkit-box;
+  margin: 0em 0 1em 0em;
+
+}
+.card {
+
+  background-color: #E8E8E8;
+  transition: 0.3s;
+  cursor: pointer;
+  border-radius: 10px;
+
+  display: wrap;
+  display: inline-block;
+  vertical-align:text-top;
+}
+
+.news:hover {
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+}
+
+.container {
+  padding: 2px 16px;
+
+	word-wrap: break-word;
+}
+
+.module1
+    {
+      width: 410px;
+      text-align: justify;
+
+      padding-top: 10px;
+    }
+
+    .module {
+      width: 410px;
+      overflow: hidden;
+      text-align: justify;
+
+      padding-top: 10px;
+    }
+    .module p ,.module1 p,.full p{
+      margin: 0;
+    }
+
+
+.full
+{
+  display:none
+}
+.close, .close1
+{
+  display: none;
+  cursor: pointer;
+  float:right;
+  margin-top: 5px;
+  margin-right: -20px;
+}
+
+.logo
+{ width:85px;
+  height: 85px;
+
+  vertical-align: top;
+  padding: 15px;
+}
+
+  </style>
+</head>
+<body>
+  <div class="external">
+
+
+  <div class="outer1_1" id="outer1_1">
+    <div class="two_button">
+      <button type="button" class ="button one" onclick="switchVisibleGoogle()" >Google News</button>
+      <button type="button" class=" button two" onclick="switchVisibleNews()">Search</button>
+    </div>
+
+    <div  class="outer1" id="outer1">
+  <form onsubmit="get_form_response();return false"  autocomplete="off">
+    <div class="child_1">
+      <label for="Keyword">Keyword<span class="comp">*</span>&nbsp;&nbsp;&nbsp;&nbsp;</label>
+      <input type="text" id="Keyword" style='width: 120px;' required>
+      <label for="From">&nbsp;&nbsp;&nbsp;&nbsp;From<span class="comp">*</span>&nbsp;&nbsp;&nbsp;&nbsp;</label>
+      <input type="date" id="From"  required  style='width: 130px;'>
+
+      <script>
+      console.log("called date default")
+      d = new Date();
+      d.setDate(d.getDate() - 7);
+      document.getElementById("From").valueAsDate = d;
+
+      </script>
+      <label for="To">&nbsp;&nbsp;&nbsp;&nbsp;To<span class="comp">*</span>&nbsp;&nbsp;&nbsp;&nbsp;</label>
+      <input type="date" id="To"  onload="load_default()" required style='width: 130px;'>
+      <script>
+            d = new Date();
+            d.setDate(d.getDate());
+            document.getElementById("To").valueAsDate = d;
+      </script>
+    </div>
+    <div class="child_2">
+    <label for="category">Category&nbsp;&nbsp;&nbsp;&nbsp;</label>
+    <select id="category" onchange="get_source(this.value)" style='width: 150px;'>
+      <option value="all" selected>All</option>
+      <option value="business">Business</option>
+      <option value="entertainment">Entertainment</option>
+      <option value="general">General</option>
+      <option value="health">Health</option>
+      <option value="science">Science</option>
+      <option value="sports">Sports</option>
+      <option value="technology">Technology</option>
+    </select>
+    <label for="source">&nbsp;&nbsp;&nbsp;&nbsp;Source&nbsp;&nbsp;&nbsp;&nbsp;</label>
+    <select id="source" style='width: 150px;'>
+      <option value="all">All</option>
+    </select>
+  </div>
+
+  <div class="child_3">
+    <input type="submit" id="submit"  value="Search" padding="10">
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <input type="reset" id="reset" value="Clear" padding="10" onclick="clear_form()">
+  </div>
+
+  </form>
+</div>
+
+  <div class="outer1_2" id="outer1_2" >
+  <script>
+  switchVisibleNewsInitial()
+  var myHTML2=""
+  console.log(all.articles.length)
+  for (var i = 0; i < 5; i++) {
+    console.log(all.articles.urlToImage)
+    myHTML2 += "<a target='_blank' href="+ all.articles[i].url +">"+"<div class='mySlides fade'>"
+    myHTML2 += "<img style='width:100%; height:100%;' src=\'"+all.articles[i].urlToImage+"\'>"
+     +"<div class='text' id='text' ><strong><div style='font-size:17px;'>"+all.articles[i].title+ "</div></strong><div style='height:10px;font-size:1px;'>&nbsp;</div>"+all.articles[i].description+"</div></div></a>";
+  }
+  document.getElementsByClassName("outer1_2")[0].innerHTML=myHTML2;
+  showSlides()
+
+</script>
+  </div>
+
+  <div class="outer1_3" id="outer1_3" >
+    <script>
+
+    // List of words
+    var myWords = words.obj
+    // set the dimensions and margins of the graph
+        var margin = {top: 5, right:5, bottom: 5, left: 5},
+        width = 210 - margin.left - margin.right,
+        height = 200 - margin.top - margin.bottom;
+
+    var svg = d3.select("#outer1_3").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")");
+
+    var layout = d3.layout.cloud()
+      .size([width, height])
+      .words(myWords.map(function(d) { return {text: d.word, size:d.size}; }))
+      .padding(5)        //space between words
+      .rotate(function() { return ~~(Math.random() * 2) * 90; })
+      .fontSize(function(d) { return d.size })      // font size of words
+      .on("end", draw);
+    layout.start();
+
+    function draw(words) {
+      svg.append("g").attr("transform", "translate(" + layout.size()[0] / 2 + "," + layout.size()[1] / 2 + ")")
+          .selectAll("text")
+            .data(words)
+          .enter().append("text")
+            .style("font-size", function(d) { return d.size+"px"; })
+            .style("fill", "#000000")
+            .attr("text-anchor", "middle")
+            .style("font-family", "Impact")
+            .attr("transform", function(d) {
+              return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+            })
+            .text(function(d) { return d.text; });
+    }
+    </script>
+  </div>
+
+  <div class="bottom" id="bottom" >
+
+  </div>
+
+  <div class="bottom" >
+  </div>
+
+  <center><div class="bottom1" id="bottom1" >
+
+  </div>
+  <center><div class="bottom2" id="bottom1" >
+
+  </div>
+</center>
+
+  <script>
+
+  var myHTML="<p align='center' class='hr_caption'style='font-size:120%;margin-bottom:-2px'><strong>CNN</strong></p><hr>";
+  myHTML+="<div class='table'>"
+    for (var i = 0; i < user.articles.length; i++) {
+      myHTML += "<div class='card' id='card' onclick= \"window.open(\'"+user.articles[i].url+"\', '_blank');\">"+"<img src=\'"+user.articles[i].urlToImage+"\' alt='Avatar' class='im' style=\'width:100%;\'>"
+       +"<div class='container' id='container'>"
+       +"<h4 id='test'><b>"+user.articles[i].title+"</b></h4><p id='desc'>"+user.articles[i].description+"</p></div></div>"
+
+       if(i<(user.articles.length-1))
+       {
+          myHTML+="<div class='bl'></div>"
+       }
+    }
+    myHTML+='</div>'
+
+
+
+    var myHTML1="<p align='center' class='hr_caption'style='font-size:120%;margin-bottom:-2px'><strong>Fox News</strong></p><hr>";
+    myHTML1+="<div class='table'>"
+      for (var i = 0; i < fox.articles.length; i++) {
+        myHTML1 += "<div class='card' id='card' onclick= \"window.open(\'"+fox.articles[i].url+"\', '_blank');\">"+"<img src=\'"+fox.articles[i].urlToImage+"\' alt='Avatar' class='im' style='width:100%;'>"
+         +"<div class='container' id='container'>"
+         +"<h4 id='test'><b>"+fox.articles[i].title+"</b></h4><p id='desc'>"+fox.articles[i].description+"</p></div></div>"
+         if(i<(fox.articles.length-1))
+         {
+           myHTML1+="<div class='bl'></div>"
+         }
+      }
+      myHTML1+='</div>'
+
+      var len_fox=fox.articles.length
+      var len_cnn=user.articles.length
+    document.getElementsByClassName("bottom")[0].innerHTML=myHTML;
+    document.getElementsByClassName("bottom")[1].innerHTML=myHTML1;
+    document.getElementsByClassName("table")[0].style.display="table"
+
+    document.getElementsByClassName("table")[1].style.display="table"
+    store=document.getElementsByClassName("card") ;
+    store1=document.getElementsByClassName("container");
+    s=document.getElementsByClassName("bl");
+    edit_im=document.getElementsByClassName("im");
+
+
+    for(var j=0;j<(len_cnn+len_fox-2);j++)
+    {
+      s[j].style.display="table-cell";
+      s[j].style.width="7.8px";
+    }
+    for( j=0;j<len_cnn+len_fox;j++)
+    {
+
+      store[j].style.border="2px solid";
+      store[j].style.borderColor="#C0C0C0"
+      store[j].style.display="table-cell";
+      store[j].style.verticalAlign="text-top";
+      edit_im[j].style.objectFit="cover"
+      store[j].style.textAlign="center";
+      store[j].style.wordWrap="break-word";
+      store[j].style.width="169px";
+      store[j].style.padding="0px 0px 0px 0px";
+      store[j].style.transition="0.3s";
+
+    }
+
+  </script>
+  </div>
+
+</div>
+</body>
+</html>
